@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="pt-BR">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mais Saúde</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        .recipe-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .recipe-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .recipe-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.05), transparent);
+            transition: left 0.6s ease;
+            z-index: 1;
+        }
+        
+        .recipe-card:hover::before {
+            left: 100%;
+        }
+        
+        .recipe-card > * {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .recipe-card:active {
+            transform: translateY(-4px) scale(1.01);
+        }
+        
+        .category-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .category-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .category-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .category-btn:hover::before {
+            left: 100%;
+        }
+        
+        .nav-btn {
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .nav-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: currentColor;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .nav-btn:hover::after {
+            width: 100%;
+        }
+        
+        .benefit-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .rating-stars {
+            color: #fbbf24;
+        }
+        
+        .modal {
+            backdrop-filter: blur(5px);
+        }
+        
+        .search-container {
+            position: relative;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #f3f4f6;
+        }
+        
+        .pagination button.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="min-h-full bg-gradient-to-br from-green-50 to-blue-50">
+  <header class="bg-white shadow-lg sticky top-0 z-40">
+   <div class="max-w-7xl mx-auto px-4 py-4"><!-- Navegação -->
+    <nav class="flex items-center justify-between mb-4">
+     <div class="flex items-center space-x-2">
+      <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+       <svg class="w-6 h-6 text-white" fill="currentColor" viewbox="0 0 24 24"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.20-1.10-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41-6.88-6.88 1.37-1.37z" />
+       </svg>
+      </div>
+      <h1 id="site-title" class="text-2xl font-bold text-gray-800">Mais Saúde</h1>
+     </div>
+     <div class="hidden md:flex space-x-6"><button onclick="showPage('home')" class="nav-btn text-gray-700 hover:text-green-600 font-medium">Início</button> <button onclick="showPage('about')" class="nav-btn text-gray-700 hover:text-green-600 font-medium">Sobre</button> <button onclick="showPage('mission')" class="nav-btn text-gray-700 hover:text-green-600 font-medium">Nossa Missão</button> <button onclick="showPage('recipes')" class="nav-btn text-gray-700 hover:text-green-600 font-medium">Receitas</button> <button onclick="showPage('benefits')" class="nav-btn text-gray-700 hover:text-green-600 font-medium">Benefícios</button> <button onclick="showPage('contact')" class="nav-btn text-gray-700 hover:text-green-600 font-medium">Contato</button>
+     </div><!-- Menu Mobile --> <button id="mobile-menu-btn" class="md:hidden text-gray-700">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg></button>
+    </nav><!-- Menu Mobile Dropdown -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t pt-4">
+     <div class="flex flex-col space-y-2"><button onclick="showPage('home')" class="nav-btn text-left text-gray-700 hover:text-green-600 font-medium py-2">Início</button> <button onclick="showPage('about')" class="nav-btn text-left text-gray-700 hover:text-green-600 font-medium py-2">Sobre</button> <button onclick="showPage('mission')" class="nav-btn text-left text-gray-700 hover:text-green-600 font-medium py-2">Nossa Missão</button> <button onclick="showPage('recipes')" class="nav-btn text-left text-gray-700 hover:text-green-600 font-medium py-2">Receitas</button> <button onclick="showPage('benefits')" class="nav-btn text-left text-gray-700 hover:text-green-600 font-medium py-2">Benefícios</button> <button onclick="showPage('contact')" class="nav-btn text-left text-gray-700 hover:text-green-600 font-medium py-2">Contato</button>
+     </div>
+    </div><!-- Subtítulo e Busca (apenas na página inicial) -->
+    <div id="header-content" class="text-center mt-4">
+     <p id="site-subtitle" class="text-xl text-gray-600 mb-4">Alimentação equilibrada para toda a família</p><!-- Barra de Pesquisa -->
+     <div class="search-container max-w-md mx-auto"><input type="text" id="search-input" placeholder="Buscar receitas..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+     </div>
+    </div>
+   </div>
+  </header>
+  <main class="max-w-7xl mx-auto px-4 py-8"><!-- Página Inicial -->
+   <div id="home-page" class="page-content"><!-- Hero Section -->
+    <section class="text-center mb-16">
+     <div class="max-w-4xl mx-auto">
+      <div class="mb-8"><!-- Imagem Hero com SVG -->
+       <div class="w-64 h-64 mx-auto mb-6 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center">
+        <svg class="w-32 h-32 text-green-600" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+        </svg>
+       </div>
+      </div>
+      <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">Transforme sua <span class="text-green-600">Alimentação</span>, Transforme sua <span class="text-blue-600">Vida</span></h2>
+      <p class="text-xl text-gray-600 mb-8 leading-relaxed">Descubra mais de 150 receitas saudáveis, organizadas por objetivos específicos. Seja para perder peso, ganhar massa muscular ou simplesmente manter uma alimentação equilibrada, temos a receita perfeita para você e sua família.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center"><button onclick="showPage('recipes')" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"> Explorar Receitas </button> <button onclick="showPage('about')" class="border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"> Saiba Mais </button>
+      </div>
+     </div>
+    </section><!-- Estatísticas -->
+    <section class="mb-16">
+     <div class="grid md:grid-cols-4 gap-6 text-center">
+      <div class="bg-white p-6 rounded-xl shadow-md">
+       <div class="text-3xl font-bold text-green-600 mb-2">
+        150+
+       </div>
+       <div class="text-gray-600">
+        Receitas Saudáveis
+       </div>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow-md">
+       <div class="text-3xl font-bold text-blue-600 mb-2">
+        5
+       </div>
+       <div class="text-gray-600">
+        Categorias Especializadas
+       </div>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow-md">
+       <div class="text-3xl font-bold text-purple-600 mb-2">
+        100%
+       </div>
+       <div class="text-gray-600">
+        Ingredientes Naturais
+       </div>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow-md">
+       <div class="text-3xl font-bold text-orange-600 mb-2">
+        24/7
+       </div>
+       <div class="text-gray-600">
+        Acesso Disponível
+       </div>
+      </div>
+     </div>
+    </section><!-- Preview das Categorias -->
+    <section class="mb-16">
+     <h2 id="categories-title" class="text-3xl font-bold text-center text-gray-800 mb-8">Categorias de Receitas</h2>
+     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"><button class="category-btn bg-orange-500 hover:bg-orange-600 text-white p-6 rounded-xl text-left" onclick="showPage('recipes'); showCategory('weekend')">
+       <div class="w-12 h-12 mb-3 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636a9 9 0 1016.728 0l-1.591 1.591M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+       </div><h3 class="text-xl font-bold mb-2">Fins de Semana</h3><p class="text-sm opacity-90">30 receitas especiais para relaxar</p></button> <button class="category-btn bg-yellow-500 hover:bg-yellow-600 text-white p-6 rounded-xl text-left" onclick="showPage('recipes'); showCategory('snacks')">
+       <div class="w-12 h-12 mb-3 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.87c1.355 0 2.697.055 4.024.165C17.155 8.51 18 9.473 18 10.608v2.513m-3-4.87v15.75" />
+        </svg>
+       </div><h3 class="text-xl font-bold mb-2">Petiscos</h3><p class="text-sm opacity-90">30 lanches saudáveis e saborosos</p></button> <button class="category-btn bg-green-500 hover:bg-green-600 text-white p-6 rounded-xl text-left" onclick="showPage('recipes'); showCategory('weightloss')">
+       <div class="w-12 h-12 mb-3 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+        </svg>
+       </div><h3 class="text-xl font-bold mb-2">Perda de Peso</h3><p class="text-sm opacity-90">30 receitas para emagrecer com saúde</p></button> <button class="category-btn bg-blue-500 hover:bg-blue-600 text-white p-6 rounded-xl text-left" onclick="showPage('recipes'); showCategory('weightgain')">
+       <div class="w-12 h-12 mb-3 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+        </svg>
+       </div><h3 class="text-xl font-bold mb-2">Ganho de Peso</h3><p class="text-sm opacity-90">30 receitas nutritivas para ganhar massa</p></button> <button class="category-btn bg-purple-500 hover:bg-purple-600 text-white p-6 rounded-xl text-left" onclick="showPage('recipes'); showCategory('balanced')">
+       <div class="w-12 h-12 mb-3 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.589-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.589-1.202L5.25 4.971z" />
+        </svg>
+       </div><h3 class="text-xl font-bold mb-2">Dieta Mista</h3><p class="text-sm opacity-90">30 receitas de equilíbrio e variedade</p></button> <button class="category-btn bg-red-500 hover:bg-red-600 text-white p-6 rounded-xl text-left" onclick="showPage('recipes'); showCategory('all')">
+       <div class="w-12 h-12 mb-3 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+        </svg>
+       </div><h3 class="text-xl font-bold mb-2">Todas as Receitas</h3><p class="text-sm opacity-90">Explore todas as 150 receitas</p></button>
+     </div>
+    </section>
+   </div><!-- Outras páginas (About, Mission, Recipes, Benefits, Contact) --> <!-- [Código das outras páginas continua...] -->
+  </main><!-- Modal de Receita -->
+  <div id="recipe-modal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+   <div class="bg-white rounded-xl max-w-4xl w-full max-h-full overflow-y-auto">
+    <div class="p-6">
+     <div class="flex justify-between items-start mb-4">
+      <h3 id="modal-title" class="text-2xl font-bold text-gray-800"></h3><button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+     </div>
+     <div id="modal-content" class="space-y-4"><!-- Conteúdo da receita será carregado aqui -->
+     </div><!-- Seção de Avaliações -->
+     <div class="mt-8 border-t pt-6">
+      <h4 class="text-lg font-bold mb-4">Avalie esta receita</h4>
+      <div class="flex items-center space-x-4 mb-4">
+       <div class="flex space-x-1"><button class="star-btn text-2xl text-gray-300 hover:text-yellow-400" data-rating="1">★</button> <button class="star-btn text-2xl text-gray-300 hover:text-yellow-400" data-rating="2">★</button> <button class="star-btn text-2xl text-gray-300 hover:text-yellow-400" data-rating="3">★</button> <button class="star-btn text-2xl text-gray-300 hover:text-yellow-400" data-rating="4">★</button> <button class="star-btn text-2xl text-gray-300 hover:text-yellow-400" data-rating="5">★</button>
+       </div>
+      </div>
+      <form id="review-form" class="space-y-4">
+       <div><label for="reviewer-name" class="block text-sm font-medium text-gray-700 mb-1">Seu nome</label> <input type="text" id="reviewer-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+       </div>
+       <div><label for="review-comment" class="block text-sm font-medium text-gray-700 mb-1">Comentário</label> <textarea id="review-comment" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Conte como foi sua experiência com esta receita..."></textarea>
+       </div><button type="submit" id="submit-review" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium">Enviar Avaliação</button>
+      </form>
+      <div id="reviews-list" class="mt-6 space-y-4"><!-- Avaliações serão carregadas aqui -->
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+        // Configuração do SDK
+        const defaultConfig = {
+            site_title: "Mais Saúde",
+            site_subtitle: "Alimentação equilibrada para toda a família",
+            benefits_title: "Benefícios por Faixa Etária",
+            categories_title: "Categorias de Receitas"
+        };
+
+        let currentRecipes = [];
+        let filteredRecipes = [];
+        let allReviews = [];
+        let currentRecipeId = null;
+        let selectedRating = 0;
+        let currentPage = 1;
+        let recipesPerPage = 9;
+        let currentCategory = 'all';
+
+        // Base de dados com 150+ receitas organizadas por categoria
+        const recipesDatabase = {
+            weekend: [
+                {
+                    id: 'pancakes-aveia',
+                    title: 'Panquecas de Aveia com Frutas',
+                    description: 'Panquecas nutritivas perfeitas para um café da manhã especial',
+                    time: '20 min',
+                    difficulty: 'Fácil',
+                    calories: '280 kcal',
+                    ingredients: ['2 xícaras de aveia em flocos', '2 ovos', '1 banana madura', '1 xícara de leite', '1 colher de mel', 'Frutas vermelhas para decorar'],
+                    instructions: ['Bata todos os ingredientes no liquidificador', 'Aqueça uma frigideira antiaderente', 'Despeje a massa e cozinhe por 2-3 minutos de cada lado', 'Sirva com frutas vermelhas e mel']
+                },
+                // ... mais receitas
+            ],
+            snacks: [
+                {
+                    id: 'chips-batata-doce',
+                    title: 'Chips de Batata Doce',
+                    description: 'Petisco crocante e nutritivo assado no forno',
+                    time: '30 min',
+                    difficulty: 'Fácil',
+                    calories: '150 kcal',
+                    ingredients: ['2 batatas doces médias', '1 colher de azeite', 'Sal marinho', 'Páprica doce', 'Alecrim fresco'],
+                    instructions: ['Corte as batatas em fatias finas', 'Tempere com azeite e especiarias', 'Asse a 200°C por 20-25 minutos', 'Vire na metade do tempo']
+                },
+                // ... mais receitas
+            ],
+            // ... outras categorias
+        };
+
+        // Inicialização dos SDKs
+        const dataHandler = {
+            onDataChanged(data) {
+                allReviews = data;
+                if (currentRecipeId) {
+                    displayReviews(currentRecipeId);
+                }
+                displayRecipes();
+            }
+        };
+
+        async function initializeApp() {
+            // Inicializar Data SDK
+            const dataResult = await window.dataSdk.init(dataHandler);
+            if (!dataResult.isOk) {
+                console.error("Erro ao inicializar Data SDK");
+            }
+
+            // Inicializar Element SDK
+            if (window.elementSdk) {
+                await window.elementSdk.init({
+                    defaultConfig,
+                    onConfigChange: async (config) => {
+                        document.getElementById('site-title').textContent = config.site_title || defaultConfig.site_title;
+                        document.getElementById('site-subtitle').textContent = config.site_subtitle || defaultConfig.site_subtitle;
+                        document.getElementById('benefits-title').textContent = config.benefits_title || defaultConfig.benefits_title;
+                        document.getElementById('categories-title').textContent = config.categories_title || defaultConfig.categories_title;
+                    },
+                    mapToCapabilities: (config) => ({
+                        recolorables: [
+                            {
+                                get: () => config.primary_color || "#10b981",
+                                set: (value) => {
+                                    config.primary_color = value;
+                                    window.elementSdk.setConfig({ primary_color: value });
+                                }
+                            }
+                        ],
+                        borderables: [],
+                        fontEditable: {
+                            get: () => config.font_family || "Inter",
+                            set: (value) => {
+                                config.font_family = value;
+                                window.elementSdk.setConfig({ font_family: value });
+                            }
+                        },
+                        fontSizeable: {
+                            get: () => config.font_size || 16,
+                            set: (value) => {
+                                config.font_size = value;
+                                window.elementSdk.setConfig({ font_size: value });
+                            }
+                        }
+                    }),
+                    mapToEditPanelValues: (config) => new Map([
+                        ["site_title", config.site_title || defaultConfig.site_title],
+                        ["site_subtitle", config.site_subtitle || defaultConfig.site_subtitle],
+                        ["benefits_title", config.benefits_title || defaultConfig.benefits_title],
+                        ["categories_title", config.categories_title || defaultConfig.categories_title]
+                    ])
+                });
+            }
+
+            setupSearch();
+            showCategory('all');
+        }
+
+        // Funções principais
+        function showPage(pageName) {
+            // Lógica de navegação entre páginas
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            const targetPage = document.getElementById(pageName + '-page');
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
+        }
+
+        function showCategory(category) {
+            // Lógica para mostrar receitas por categoria
+            if (category === 'all') {
+                currentRecipes = [];
+                Object.values(recipesDatabase).forEach(categoryRecipes => {
+                    currentRecipes = currentRecipes.concat(categoryRecipes);
+                });
+            } else {
+                currentRecipes = recipesDatabase[category] || [];
+            }
+            
+            filteredRecipes = currentRecipes;
+            currentPage = 1;
+            displayRecipes();
+        }
+
+        function displayRecipes() {
+            // Lógica para exibir receitas na tela
+            const grid = document.getElementById('recipes-grid');
+            const startIndex = (currentPage - 1) * recipesPerPage;
+            const endIndex = startIndex + recipesPerPage;
+            const recipesToShow = filteredRecipes.slice(startIndex, endIndex);
+            
+            grid.innerHTML = '';
+            
+            recipesToShow.forEach(recipe => {
+                const recipeCard = document.createElement('div');
+                recipeCard.className = 'recipe-card bg-white rounded-xl shadow-md hover:shadow-xl p-6 cursor-pointer';
+                recipeCard.onclick = () => openRecipe(recipe);
+                
+                recipeCard.innerHTML = `
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">${recipe.title}</h3>
+                    <p class="text-gray-600 text-sm mb-4">${recipe.description}</p>
+                    <div class="grid grid-cols-3 gap-3 text-xs">
+                        <div class="text-center">
+                            <div class="font-medium text-gray-700">${recipe.time}</div>
+                            <div class="text-gray-500">Preparo</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-medium text-gray-700">${recipe.difficulty}</div>
+                            <div class="text-gray-500">Dificuldade</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="font-medium text-gray-700">${recipe.calories}</div>
+                            <div class="text-gray-500">Calorias</div>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(recipeCard);
+            });
+        }
+
+        function openRecipe(recipe) {
+            // Lógica para abrir modal da receita
+            currentRecipeId = recipe.id;
+            const modal = document.getElementById('recipe-modal');
+            
+            document.getElementById('modal-title').textContent = recipe.title;
+            
+            const content = document.getElementById('modal-content');
+            content.innerHTML = `
+                <div class="mb-6">
+                    <p class="text-gray-600 text-lg mb-4">${recipe.description}</p>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl mb-1">⏱️</div>
+                            <div class="font-semibold">${recipe.time}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl mb-1">📊</div>
+                            <div class="font-semibold">${recipe.difficulty}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl mb-1">🔥</div>
+                            <div class="font-semibold">${recipe.calories}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-bold text-xl mb-4">Ingredientes</h4>
+                        <ul class="space-y-2">
+                            ${recipe.ingredients.map(ingredient => `
+                                <li class="flex items-start">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>${ingredient}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold text-xl mb-4">Modo de Preparo</h4>
+                        <ol class="space-y-3">
+                            ${recipe.instructions.map((step, index) => `
+                                <li class="flex items-start">
+                                    <span class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 mt-0.5">${index + 1}</span>
+                                    <span>${step}</span>
+                                </li>
+                            `).join('')}
+                        </ol>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            displayReviews(recipe.id);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('recipe-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Sistema de avaliações
+        function displayReviews(recipeId) {
+            const reviewsList = document.getElementById('reviews-list');
+            const recipeReviews = allReviews.filter(review => review.recipe_id === recipeId);
+            
+            if (recipeReviews.length === 0) {
+                reviewsList.innerHTML = '<p class="text-gray-500 text-center py-4">Seja o primeiro a avaliar esta receita!</p>';
+                return;
+            }
+            
+            reviewsList.innerHTML = recipeReviews.map(review => `
+                <div class="border-l-4 border-blue-500 pl-4 py-2">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium">${review.user_name}</span>
+                        <div class="rating-stars">
+                            ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                        </div>
+                    </div>
+                    ${review.comment ? `<p class="text-gray-700 text-sm">${review.comment}</p>` : ''}
+                    <p class="text-xs text-gray-500 mt-1">${new Date(review.created_at).toLocaleDateString('pt-BR')}</p>
+                </div>
+            `).join('');
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            showPage('home');
+        });
+
+        // Formulário de avaliação
+        document.getElementById('review-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (selectedRating === 0) {
+                alert('Por favor, selecione uma avaliação com estrelas.');
+                return;
+            }
+            
+            const reviewerName = document.getElementById('reviewer-name').value.trim();
+            const reviewComment = document.getElementById('review-comment').value.trim();
+            
+            if (!reviewerName) {
+                alert('Por favor, digite seu nome.');
+                return;
+            }
+            
+            const reviewData = {
+                recipe_id: currentRecipeId,
+                user_name: reviewerName,
+                rating: selectedRating,
+                comment: reviewComment,
+                created_at: new Date().toISOString()
+            };
+            
+            const result = await window.dataSdk.create(reviewData);
+            
+            if (result.isOk) {
+                alert('Avaliação enviada com sucesso!');
+                document.getElementById('review-form').reset();
+                selectedRating = 0;
+            } else {
+                alert('Erro ao enviar avaliação. Tente novamente.');
+            }
+        });
+
+        // Sistema de busca
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                if (searchTerm) {
+                    performSearch(searchTerm);
+                } else {
+                    showCategory('all');
+                }
+            });
+        }
+
+        function performSearch(searchTerm) {
+            let allRecipes = [];
+            Object.values(recipesDatabase).forEach(categoryRecipes => {
+                allRecipes = allRecipes.concat(categoryRecipes);
+            });
+            
+            const searchResults = allRecipes.filter(recipe => {
+                return recipe.title.toLowerCase().includes(searchTerm) ||
+                       recipe.description.toLowerCase().includes(searchTerm) ||
+                       recipe.ingredients.some(ingredient => ingredient.toLowerCase().includes(searchTerm));
+            });
+            
+            currentRecipes = searchResults;
+            filteredRecipes = searchResults;
+            currentPage = 1;
+            displayRecipes();
+        }
+    </script><!-- Rodapé -->
+  <footer class="bg-gray-800 text-white mt-16">
+   <div class="max-w-7xl mx-auto px-4 py-12">
+    <div class="text-center">
+     <div class="flex items-center justify-center space-x-2 mb-4">
+      <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+       <svg class="w-6 h-6 text-white" fill="currentColor" viewbox="0 0 24 24"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.20-1.10-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41-6.88-6.88 1.37-1.37z" />
+       </svg>
+      </div>
+      <h3 class="text-2xl font-bold">Mais Saúde</h3>
+     </div>
+     <p class="text-gray-300 mb-4">Uma criação da <strong>FITplus</strong> - Tecnologia para sua saúde</p>
+     <div class="text-gray-400 text-sm">
+      © 2024 Mais Saúde by FITplus. Todos os direitos reservados.
+     </div>
+    </div>
+   </div>
+  </footer>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9977f36d47e99ad4',t:'MTc2MTk2NDAyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
